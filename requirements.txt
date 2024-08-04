@@ -5,3 +5,5 @@ langchain-groq
 langchain-huggingface
 faiss-cpu
 PyPDF2
+pyannote.audio
+pydub
