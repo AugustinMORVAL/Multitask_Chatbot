@@ -39,7 +39,7 @@ Install dependencies
 Running the Chatbot
 
 ```bash
-  streamlit run app.py
+  streamlit run app/feature_you_want_to_run.py
 ```
 
 
