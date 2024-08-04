@@ -20,7 +20,7 @@ This project aims to develop an AI-powered chatbot that operates seamlessly on a
   - **Text-to-Speech**: Converts text responses into speech, providing a more natural and interactive user experience.
 - **File Management**:
   - **File Upload/Download**: Users can upload and download files through the chatbot interface.
-  - **File Processing**: The chatbot can read, understand, and manipulate the content of various file types (e.g., text, PDF, Excel).
+  - **File Processing**: The chatbot can read, understand, and manipulate the content of various file types (e.g., text, PDF).
 
 ## Run Locally
 
