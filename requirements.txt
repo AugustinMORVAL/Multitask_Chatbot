@@ -1,9 +1,13 @@
 streamlit
 python-dotenv
 langchain
-langchain-groq
 langchain-huggingface
+langchain-groq
 faiss-cpu
 PyPDF2
-pyannote.audio
 pydub
+git+https://github.com/huggingface/parler-tts.git
+torch
+torchaudio
+pytorch-lightning
+torchvision
