@@ -2,6 +2,7 @@ streamlit
 python-dotenv
 langchain
 langchain-huggingface
+langchain-community
 langchain-groq
 faiss-cpu
 PyPDF2
@@ -11,3 +12,12 @@ torch
 torchaudio
 pytorch-lightning
 torchvision
+unstructured
+pdfminer.six
+
+#pdf 
+unstructured
+openai
+pinecone-client
+pi-heif
+unstructured_inference
