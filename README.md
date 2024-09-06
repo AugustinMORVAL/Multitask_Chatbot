@@ -1,7 +1,5 @@
 
 # Multitask Chatbot Project
-![Logo](https://github.com/AugustinMORVAL/Chatbot_with_Groq/blob/main/img/logo-Cyy6uKYt.png)
-
 
 ## Overview
 
