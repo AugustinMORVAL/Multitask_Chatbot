@@ -1,0 +1,28 @@
+models:
+  - gemma2-9b-it
+  - gemma-7b-it
+  - llama3-70b-8192
+  - llama3-8b-8192
+  - mixtral-8x7b-32768
+
+temperature_slider:
+  min_value: 0.0
+  max_value: 1.0
+  value: 0.2
+  step: 0.1
+  help: "Controls the randomness of the model's responses."
+
+system_prompt:
+  value: "You are a helpful assistant."
+  height: 100
+  help: "Sets the context and behavior for the conversation."
+
+additional_parameters:
+  max_tokens:
+    label: "Max Tokens"
+    slider:
+      min_value: 1
+      max_value: 4096
+      value: 512
+      step: 1
+      help: "Set the maximum number of tokens for the model's response."
