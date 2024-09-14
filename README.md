@@ -53,11 +53,11 @@ Create a `.env` file in the root directory to store your API keys:
 
 ### Available LLM Models
 
-- 🧠 **Gemma Model 2 - 9B**: Advanced comprehensive language understanding
-- 🚀 **Gemma Model - 7B**: Efficient for various NLP tasks
-- 🐑 **LLaMA 3 - 70B**: Robust large-scale language understanding
-- 🐑 **LLaMA 3 - 8B**: Quick and efficient responses
-- 🔄 **Mixtral - 8x7B**: Powerful ensemble model for superior performance
+- 🧠 **Gemma Model 2 - 9B**: Google's open-source model, optimized for efficiency and performance
+- 🚀 **Gemma Model - 7B**: Smaller variant of Gemma, balancing speed and capability
+- 🐑 **LLaMA 3 - 70B**: Meta's largest model, excelling in complex reasoning and generation tasks
+- 🐑 **LLaMA 3 - 8B**: Compact LLaMA variant, suitable for resource-constrained environments
+- 🔄 **Mixtral - 8x7B**: Mistral AI's mixture-of-experts model, combining multiple specialized sub-models
 
 ### Additional Tools
 
