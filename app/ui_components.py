@@ -1,6 +1,8 @@
 import streamlit as st
 import time
 
+st.set_page_config(initial_sidebar_state="collapsed")
+
 def create_sidebar(config):
     st.sidebar.title("Powered by AIugustin")
     model = st.sidebar.selectbox("Select a model", options=config['models'])
@@ -11,11 +13,14 @@ def create_sidebar(config):
     parameters = {}
     if st.sidebar.toggle("Add more parameters"):
         for param, settings in config['additional_parameters'].items():
-            parameters[param] = st.sidebar.slider(settings['label'], **settings['slider'])
+            if 'slider' in settings:
+                parameters[param] = st.sidebar.slider(settings['label'], **settings['slider'])
+            elif 'input' in settings:
+                parameters[param] = st.sidebar.text_input(settings['label'], **settings['input'])
     
     return model, temperature, system_prompt, reset_conversation, parameters
 
-def create_chat_interface(chatbot_manager, model, temperature, system_prompt, reset_conversation, parameters):
+def create_chat_interface(chatbot_manager, pdf_manager, model, temperature, system_prompt, reset_conversation, parameters):
     # Initialize chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -40,7 +45,10 @@ def create_chat_interface(chatbot_manager, model, temperature, system_prompt, re
             st.markdown(prompt)
         
         # Get chatbot response
-        response = chatbot_manager.get_response(model, st.session_state.messages, temperature, **parameters)
+        try:
+            response = pdf_manager.query_pdf(chatbot_manager, model, prompt, temperature)
+        except ValueError:
+            response = chatbot_manager.get_response(model, st.session_state.messages, temperature, **parameters)
         
         # Display chatbot response
         with st.chat_message("assistant"):
@@ -53,3 +61,28 @@ def create_chat_interface(chatbot_manager, model, temperature, system_prompt, re
             message_placeholder.markdown(full_response)
         
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+def create_file_uploader():
+    file_data = None
+    audio_data = None
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        with st.expander("Upload files📄"):
+            uploaded_file = st.file_uploader("Choose a file", type=["txt", "pdf", "docx"], label_visibility="collapsed")
+            if uploaded_file is not None:
+                file_contents = uploaded_file.read()
+                st.success(f"'{uploaded_file.name}' uploaded!")
+                file_data = {"type": "file", "content": file_contents, "name": uploaded_file.name}
+
+    with col2:
+        with st.expander("Upload audio🎵"):
+            audio_file = st.file_uploader("Choose an audio file", type=["mp3", "wav", "ogg"], label_visibility="collapsed")
+            if audio_file is not None:
+                audio_contents = audio_file.read()
+                st.success(f"'{audio_file.name}' uploaded!")
+                st.audio(audio_contents, format=f"audio/{audio_file.name.split('.')[-1]}")
+                audio_data = {"type": "audio", "content": audio_contents, "name": audio_file.name}
+
+    return file_data, audio_data

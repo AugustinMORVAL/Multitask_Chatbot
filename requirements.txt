@@ -1,4 +1,16 @@
 streamlit
-groq
+# Settings
 pyyaml
 python-dotenv
+# Chatbot
+groq
+# PDF Manager
+pymupdf
+langchain
+langchain-community
+langchain-huggingface
+sentence-transformers
+# Document Manager
+python-pptx
+pytesseract
+openpyxl
