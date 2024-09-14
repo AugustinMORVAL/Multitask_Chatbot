@@ -1,24 +1,22 @@
-
 # Multitask Chatbot Project
 
 ## Overview
 
-This project aims to develop an AI-powered chatbot that operates seamlessly on any computer setup. The project includes basic functionalities and additional features such as audio processing and file management.
+This project aims to develop an AI-powered chatbot that operates seamlessly on any computer setup. The chatbot incorporates various functionalities, including text-based interaction, document processing, and file management. The core of this project is built upon Groq's API, leveraging its powerful language models for efficient and accurate natural language processing.
+
 ## Features
 
 ### Core Functionalities
 
-- **Text-based Interaction**: The chatbot can understand and respond to text-based queries effectively.
-- **Context Awareness**: The chatbot maintains the context of the conversation to provide relevant responses.
+- **Text-based Interaction**: The chatbot understands and responds to text-based queries effectively.
+- **Context Awareness**: Maintains conversation context for relevant responses.
+- **Multiple Language Models**: Supports various LLM models for diverse use cases.
 
-### Additional Features
+### Document Management
 
-- **Audio Processing**:
-  - **Speech Recognition**: Converts spoken language into text to enable voice-based interaction.
-  - **Text-to-Speech**: Converts text responses into speech, providing a more natural and interactive user experience.
-- **File Management**:
-  - **File Upload/Download**: Users can upload and download files through the chatbot interface.
-  - **File Processing**: The chatbot can read, understand, and manipulate the content of various file types (e.g., text, PDF).
+- **PDF Processing**: Ability to read, analyze, and answer questions based on PDF documents.
+- **Text Extraction**: Extracts text from uploaded documents for analysis.
+- **Multi-format Support**: Handles various file types including PDFs, text files, and potentially other document formats.
 
 ## Run Locally
 
@@ -37,57 +35,27 @@ Install dependencies
 Running the Chatbot
 
 ```bash
-  streamlit run app/feature_you_want_to_run.py
+  streamlit run chatbot.py
 ```
 
-
 ## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
 
 ### Necessary API keys
 Create a `.env` file in the root directory of your project. This file will store your API keys and other environment variables.
 
 | API keys     | Type     | Description                | Link to Create API Key |
 | :------------| :------- | :------------------------- | :--------------------- |
-| `HF_TOKEN`   | `string` | **Required**. Your API key | [Create Hugging Face API Key](https://huggingface.co/settings/tokens) |
 | `GROQ_API_KEY` | `string` | **Required**. Your API key | [Create Groq API Key](https://console.groq.com/keys) |
 
-
-### (Additionnal) Loading Environment Variables in Your Python Code
-
-Install the `python-dotenv` package:
-
-```sh
-pip install python-dotenv
-```
-
-Load the environment variables by using the `load_dotenv` function from the `dotenv` package.
-
-**Example of usage:**
-```python
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-HF_TOKEN = os.getenv("HF_TOKEN")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-```
 ## Future Enhancements
 - **Proccessed files**: Enhancing the ability to handle a variety of file types.
 - **Advanced Analytics**: Providing users with analytics and insights based on their interactions.
 - **Web navigation**: Enabling the chatbot to browse and search web content.
 - And more !
+
 ## Development Tools and Technologies
 
-### General overview
-
-**Programming Languages**: Python
-
-**Frameworks**: Streamlit for Web-based Interface
-
-**APIs**: Groq, Hugging Face 
-
+This project heavily relies on Groq's API and language models for its core functionality. Groq provides the backbone for our chatbot's natural language understanding and generation capabilities.
 
 ### Available LLM models
 - **Gemma Model 2 - 9B**: A highly advanced model designed for comprehensive language understanding and generation tasks.
@@ -104,9 +72,18 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 - **Whisper Large V3**: An advanced model optimized for understanding and generating spoken language, making it ideal for audio processing tasks.
 
-- **Pyannote**: A powerful open-source toolkit for speaker diarization by distinguishing and recognizing multiple speakers in audio recordings.
+## Ongoing Work
 
+- Enhancing document processing capabilities
+- Expanding supported file types for upload and analysis
+- Improving the user interface and experience
+
+## Future Enhancements
+
+- **Web Navigation**: Enable the chatbot to browse and search web content
+- **Advanced Analytics**: Provide insights based on user interactions
+- **Multi-modal Interactions**: Combine text and visual inputs
 
 ## Contributing
 
-Contributions are always welcome! You can fork the repository and submit pull requests for any features, bug fixes, or improvements.
+Contributions are welcome! Please fork the repository and submit pull requests for any features, bug fixes, or improvements.
