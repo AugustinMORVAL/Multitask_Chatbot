@@ -16,18 +16,24 @@ class UIComponents:
         model = st.sidebar.selectbox("Select a model", options=self.config['models'])
         cot_reflection = st.sidebar.toggle("Enable CoT reflection", value=False, help=self.config['cot_reflection']['help'])
         system_prompt = self.update_system_prompt(cot_reflection)
+        show_cot_process = st.sidebar.toggle("Show CoT process", value=False, help="Show the CoT process in the response") if cot_reflection else False
         temperature = st.sidebar.slider("Temperature", **self.config['temperature_slider'])
-        max_tokens = st.sidebar.slider("Max Tokens", **self.config['max_tokens_slider'])
+        max_tokens = self.update_max_tokens(cot_reflection)
         reset_conversation = st.sidebar.button("Reset Conversation")
         parameters = self.set_parameters()
         
-        return model, system_prompt, temperature, max_tokens, reset_conversation, parameters
+        return model, system_prompt, temperature, max_tokens, cot_reflection, show_cot_process, reset_conversation, parameters
     
     def update_system_prompt(self, cot_reflection):
         prompt_mode = "cot_reflection" if cot_reflection else "system_prompt"
         system_prompt = st.sidebar.text_area("System Prompt", value=self.config[prompt_mode]['value'], help=self.config['system_prompt']['help'])
         st.session_state.system_prompt = system_prompt
         return system_prompt
+    
+    def update_max_tokens(self, cot_reflection):
+        max_tokens_settings = self.config['max_tokens_slider'] if not cot_reflection else self.config['max_tokens_slider_cot_reflection']
+        max_tokens = st.sidebar.slider("Max Tokens", **max_tokens_settings)
+        return max_tokens
     
     def set_parameters(self):
         parameters = {}
@@ -39,7 +45,7 @@ class UIComponents:
                     parameters[param] = st.sidebar.text_input(settings['label'], **settings['input'])
         return parameters
 
-    def create_chat_interface(self, chatbot_manager, pdf_manager, model, system_prompt, temperature, max_tokens, reset_conversation, parameters):
+    def create_chat_interface(self, chatbot_manager, pdf_manager, model, system_prompt, temperature, max_tokens, cot_reflection, show_cot_process, reset_conversation, parameters):
         
         if reset_conversation:
             st.session_state.messages = []
@@ -68,7 +74,8 @@ class UIComponents:
             try:
                 response = pdf_manager.query_pdf(chatbot_manager, model, prompt, temperature)
             except ValueError:
-                response = chatbot_manager.get_response(model, st.session_state.messages, temperature, max_tokens, **parameters)
+                response = chatbot_manager.get_response(model, st.session_state.messages, temperature, max_tokens, cot_reflection, show_cot_process, **parameters)
+
             
             # Display chatbot response
             with st.chat_message("assistant"):
@@ -83,7 +90,7 @@ class UIComponents:
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
     def create_file_uploader(self):
-        with st.expander("📄 Upload your files into the database", expanded=True):
+        with st.expander("📄 Upload your files into the database", expanded=False):
             uploaded_files = st.file_uploader("Choose files", type=["pdf", "docx", "mp3", "wav"], accept_multiple_files=True, label_visibility="collapsed")
             
             current_files = [file['file'] for file in st.session_state.database]

@@ -19,35 +19,47 @@ system_prompt:
 
 cot_reflection:
   value: |
-        You are an AI assistant that uses a Chain of Thought (CoT) approach with reflection to answer queries. Follow these steps:
+    You are an advanced AI assistant that uses a sophisticated Chain of Thought (CoT) approach with multi-stage reflection to answer queries. Follow these steps:
 
-        1. Think through the problem step by step within the <thinking> tags.
-        2. Reflect on your thinking to check for any errors or improvements within the <reflection> tags.
-        3. Make any necessary adjustments based on your reflection.
-        4. Provide your final, concise answer within the <output> tags.
+    1. Initial Analysis: Analyze the query and break it down into key components.
+    2. Research: If needed, outline any research or information gathering steps.
+    3. Reasoning: Think through the problem step by step.
+    4. First Reflection: Reflect on your reasoning to check for errors, biases, or improvements.
+    5. Refinement: Make adjustments based on your reflection.
+    6. Second Reflection: Perform a final check on your refined reasoning.
+    7. Conclusion: Synthesize your thoughts into a concise, clear answer.
+    8. Output: Provide your final, polished answer. Don't hesitate to get into details the answer must provide all the necessary information to respond the question. 
+    9. Resources: If needed, provide the resources used to answer the question.
 
-        Important: The <thinking> and <reflection> sections are for your internal reasoning process only. 
-        Do not include any part of the final answer in these sections. 
-        The actual response to the query must be entirely contained within the <output> tags.
-
-        Use the following format for your response:
-        <thinking>
-        [Your step-by-step reasoning goes here. This is your internal thought process, not the final answer.]
-        <reflection>
-        [Your reflection on your reasoning, checking for errors or improvements]
-        </reflection>
-        [Any adjustments to your thinking based on your reflection]
-        </thinking>
-        <output>
-        [Your final, concise answer to the query. This is the only part that will be shown to the user.]
-        </output>
+    Use the following format for your response:
+    <thinking>
+    [Your step-by-step reasoning goes here.]
+    <reflection>
+    [Your reflection on your reasoning, checking for errors or improvements]
+    </reflection>
+    [Any adjustments to your thinking based on your reflection]
+    </thinking>
+    <output>
+    [Your final answer to the query with all ressources used to answer the question.]
+    </output>
   height: 100
-  help: "Sets a prompt for advanced problem-solving. The AI will show its reasoning process, self-reflect, and then provide a concise answer, improving accuracy and transparency."
+  help: "Sets a prompt for advanced problem-solving with multi-stage reflection, improving accuracy, transparency, and depth of reasoning."
+  tags:
+    thinking: 🧠
+    reflection: 💡
+    output: 📤
 
 max_tokens_slider:
   min_value: 100
   max_value: 4096
   value: 500
+  step: 100
+  help: "Controls the maximum number of tokens in the model's responses."
+
+max_tokens_slider_cot_reflection:
+  min_value: 100
+  max_value: 4096
+  value: 4096
   step: 100
   help: "Controls the maximum number of tokens in the model's responses."
 
