@@ -17,15 +17,14 @@ system_prompt:
   height: 100
   help: "Sets the context and behavior for the conversation."
 
+max_tokens_slider:
+  min_value: 100
+  max_value: 4096
+  value: 500
+  step: 100
+  help: "Controls the maximum number of tokens in the model's responses."
+
 additional_parameters:
-  max_tokens:
-    label: "Max Tokens"
-    slider:
-      min_value: 1
-      max_value: 4096
-      value: 512
-      step: 1
-      help: "Set the maximum number of tokens for the model's response."
   top_p:
     label: "Top P"
     slider:

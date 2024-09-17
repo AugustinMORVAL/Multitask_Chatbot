@@ -9,9 +9,7 @@ class PDFManager:
     def __init__(self, db_directory="./pdf_db"):
         self.database = db_directory
         self.embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"clean_up_tokenization_spaces": True},
-            model_config=ConfigDict(protected_namespaces=())
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
         self.vector_store = None
 

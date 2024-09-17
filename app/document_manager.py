@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 import io
 import fitz
 from pptx import Presentation
