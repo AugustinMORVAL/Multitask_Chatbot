@@ -2,29 +2,37 @@ import streamlit as st
 import time
 
 class UIComponents:
-    def __init__(self):
+    def __init__(self, config):
+        self.config = config
         if "messages" not in st.session_state:
             st.session_state.messages = []
-        if "file_data" not in st.session_state:
-            st.session_state.file_data = None
-        if "audio_data" not in st.session_state:
-            st.session_state.audio_data = None
+        if "system_prompt" not in st.session_state:
+            st.session_state.system_prompt = ""
+        if "database" not in st.session_state:
+            st.session_state.database = []
 
-    def create_sidebar(self, config):
+    def create_sidebar(self):
         st.sidebar.title("Powered by AIugustin")
-        model = st.sidebar.selectbox("Select a model", options=config['models'])
-        system_prompt = st.sidebar.text_area("System Prompt", **config['system_prompt'])
-        temperature = st.sidebar.slider("Temperature", **config['temperature_slider'])
-        max_tokens = st.sidebar.slider("Max Tokens", **config['max_tokens_slider'])
+        model = st.sidebar.selectbox("Select a model", options=self.config['models'])
+        cot_reflection = st.sidebar.toggle("Enable CoT reflection", value=False, help=self.config['cot_reflection']['help'])
+        system_prompt = self.update_system_prompt(cot_reflection)
+        temperature = st.sidebar.slider("Temperature", **self.config['temperature_slider'])
+        max_tokens = st.sidebar.slider("Max Tokens", **self.config['max_tokens_slider'])
         reset_conversation = st.sidebar.button("Reset Conversation")
-        parameters = self.set_parameters(config)
+        parameters = self.set_parameters()
         
         return model, system_prompt, temperature, max_tokens, reset_conversation, parameters
     
-    def set_parameters(self, config):
+    def update_system_prompt(self, cot_reflection):
+        prompt_mode = "cot_reflection" if cot_reflection else "system_prompt"
+        system_prompt = st.sidebar.text_area("System Prompt", value=self.config[prompt_mode]['value'], help=self.config['system_prompt']['help'])
+        st.session_state.system_prompt = system_prompt
+        return system_prompt
+    
+    def set_parameters(self):
         parameters = {}
         if st.sidebar.toggle("Add more parameters"):
-            for param, settings in config['additional_parameters'].items():
+            for param, settings in self.config['additional_parameters'].items():
                 if 'slider' in settings:
                     parameters[param] = st.sidebar.slider(settings['label'], **settings['slider'])
                 elif 'input' in settings:
@@ -32,17 +40,16 @@ class UIComponents:
         return parameters
 
     def create_chat_interface(self, chatbot_manager, pdf_manager, model, system_prompt, temperature, max_tokens, reset_conversation, parameters):
-        # Initialize chat history
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
         
-        # Reset conversation if button is clicked
         if reset_conversation:
             st.session_state.messages = []
         
         # Add system prompt to messages
         if not st.session_state.messages or st.session_state.messages[0]["role"] != "system" or st.session_state.messages[0]["content"] != system_prompt:
-            st.session_state.messages.insert(0, {"role": "system", "content": system_prompt})
+            if st.session_state.messages and st.session_state.messages[0]["role"] == "system":
+                st.session_state.messages[0] = {"role": "system", "content": system_prompt}
+            else:
+                st.session_state.messages.insert(0, {"role": "system", "content": system_prompt})
         
         # Display chat messages
         for message in st.session_state.messages:
@@ -76,26 +83,32 @@ class UIComponents:
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
     def create_file_uploader(self):
-        file_data = None
-        audio_data = None
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            with st.expander("Upload files📄"):
-                uploaded_file = st.file_uploader("Choose a file", type=["txt", "pdf", "docx"], label_visibility="collapsed")
-                if uploaded_file is not None:
+        with st.expander("📄 Upload your files into the database", expanded=True):
+            uploaded_files = st.file_uploader("Choose files", type=["pdf", "docx", "mp3", "wav"], accept_multiple_files=True, label_visibility="collapsed")
+            
+            current_files = [file['file'] for file in st.session_state.database]
+            for uploaded_file in uploaded_files:
+                if uploaded_file not in current_files:
                     file_contents = uploaded_file.read()
-                    st.success(f"'{uploaded_file.name}' uploaded!")
-                    file_data = {"type": "file", "content": file_contents, "name": uploaded_file.name}
+                    st.session_state.database.append({
+                        "file": uploaded_file,
+                        "content": file_contents,
+                        "name": uploaded_file.name,
+                        "type": uploaded_file.type
+                    })
+            
+            st.session_state.database = [
+                file for file in st.session_state.database
+                if file['file'] in uploaded_files
+            ]
 
-        with col2:
-            with st.expander("Upload audio🎵"):
-                audio_file = st.file_uploader("Choose an audio file", type=["mp3", "wav", "ogg"], label_visibility="collapsed")
-                if audio_file is not None:
-                    audio_contents = audio_file.read()
-                    st.success(f"'{audio_file.name}' uploaded!")
-                    st.audio(audio_contents, format=f"audio/{audio_file.name.split('.')[-1]}")
-                    audio_data = {"type": "audio", "content": audio_contents, "name": audio_file.name}
+        self.display_database()
+        return uploaded_files
 
-        return file_data, audio_data
+    def display_database(self):
+        if st.session_state.database:
+            with st.expander("📚 Database contents", expanded=False):
+                for file in st.session_state.database:
+                    file_type = file['type'].lower()
+                    icon = self.config['file_icons'].get(file_type, '📄')
+                    st.write(f"{icon} {file['name']} ({file_type})")
