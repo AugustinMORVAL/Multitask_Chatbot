@@ -25,8 +25,5 @@ st.markdown("Nice to see you again!")
 # Sidebar
 model, system_prompt, temperature, max_tokens, cot_reflection, show_cot_process, reset_conversation, parameters = ui.create_sidebar()
 
-# Upload file
-files_uploaded = ui.create_file_uploader()
-
 # Chat Interface
 ui.create_chat_interface(chatbot_manager, pdf_manager, model, system_prompt, temperature, max_tokens, cot_reflection, show_cot_process, reset_conversation, parameters)

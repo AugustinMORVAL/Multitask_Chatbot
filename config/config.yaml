@@ -97,6 +97,10 @@ additional_parameters:
 file_icons:
   pdf: 📄
   docx: 📝
-  mp3: 🎵
-  wav: 🎶
-  ogg: 🎶
+  audio*: 🎵
+  audio/wav: 🔊
+  audio/mpeg: 🎧
+  audio/ogg: 🎼
+  audio/flac: 🔉
+  audio/aac: 🎶
+  audio/m4a: 🎙️

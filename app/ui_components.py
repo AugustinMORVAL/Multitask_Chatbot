@@ -10,6 +10,8 @@ class UIComponents:
             st.session_state.system_prompt = ""
         if "database" not in st.session_state:
             st.session_state.database = []
+        if "external_databse" not in st.session_state: 
+            st.session_state.external_database = []
 
     def create_sidebar(self):
         st.sidebar.title("Powered by AIugustin")
@@ -89,9 +91,14 @@ class UIComponents:
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-    def create_file_uploader(self):
-        with st.expander("📄 Upload your files into the database", expanded=False):
-            uploaded_files = st.file_uploader("Choose files", type=["pdf", "docx", "mp3", "wav"], accept_multiple_files=True, label_visibility="collapsed")
+    def create_file_uploader(self, sidebar=False):
+        st_component = st.sidebar if sidebar else st
+        
+        with st_component.expander("📄 Upload your files into the database", expanded=False):
+            uploaded_files = st_component.file_uploader("Choose files", 
+                                                        type=["pdf", "docx", "mp3", "wav"], 
+                                                        accept_multiple_files=True
+                                                        )
             
             current_files = [file['file'] for file in st.session_state.database]
             for uploaded_file in uploaded_files:
@@ -108,14 +115,23 @@ class UIComponents:
                 file for file in st.session_state.database
                 if file['file'] in uploaded_files
             ]
-
-        self.display_database()
         return uploaded_files
 
-    def display_database(self):
+    def display_database(self, sidebar=False):
+        st_component = st.sidebar if sidebar else st
+
+        if st.session_state.external_database: 
+            pass
+        else : 
+            with st_component.expander("No external database linked."):
+                pass
+
         if st.session_state.database:
-            with st.expander("📚 Database contents", expanded=False):
+            st.write(f"Current database size: {len(st.session_state.database)}")
+            with st_component.expander("Database content", icon="📚", expanded=True):
                 for file in st.session_state.database:
                     file_type = file['type'].lower()
                     icon = self.config['file_icons'].get(file_type, '📄')
                     st.write(f"{icon} {file['name']} ({file_type})")
+        else:
+            st.write("No files in the database.")
