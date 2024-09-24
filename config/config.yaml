@@ -1,9 +1,7 @@
 models:
-  - gemma2-9b-it
-  - gemma-7b-it
-  - llama3-70b-8192
-  - llama3-8b-8192
   - mixtral-8x7b-32768
+  - llama3-70b-8192
+  - gemma2-9b-it
 
 temperature_slider:
   min_value: 0.0
@@ -40,7 +38,7 @@ cot_reflection:
     [Any adjustments to your thinking based on your reflection]
     </thinking>
     <output>
-    [Your final answer to the query with all ressources used to answer the question.]
+    [Your final answer to the query with all resources used to answer the question.]
     </output>
   height: 100
   help: "Sets a prompt for advanced problem-solving with multi-stage reflection, improving accuracy, transparency, and depth of reasoning."

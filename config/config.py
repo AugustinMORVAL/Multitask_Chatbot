@@ -1,4 +1,3 @@
-import os
 import yaml
 
 def load_config():
