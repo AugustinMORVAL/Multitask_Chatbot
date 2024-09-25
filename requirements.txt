@@ -1,16 +1,22 @@
 streamlit
-# Settings
+# Core
 pyyaml
 python-dotenv
-# Chatbot
-groq
-# PDF Manager
-pymupdf
+# LLM and Chatbot
 langchain
+langchain-core
 langchain-community
-langchain-huggingface
+langchain-experimental
+langchain-groq
+# Database
+sqlalchemy
+# Search
+duckduckgo-search
+# PDF Processing
+pymupdf
+# Vector Embeddings
 sentence-transformers
-# Document Manager
+# Document Processing
 python-pptx
 pytesseract
 openpyxl
