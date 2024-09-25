@@ -10,6 +10,8 @@ langchain-experimental
 langchain-groq
 # Database
 sqlalchemy
+# Maths
+numexpr
 # Search
 duckduckgo-search
 # PDF Processing
