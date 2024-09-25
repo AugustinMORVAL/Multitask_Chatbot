@@ -13,7 +13,7 @@ This AI-powered chatbot operates seamlessly on any computer setup, incorporating
 - [Environment Variables](#-environment-variables)
 - [Development Tools and Technologies](#-development-tools-and-technologies)
   - [Available LLM Models](#available-llm-models)
-  - [Chain of Thought (CoT) Reasoning](#-chain-of-thought-cot-reasoning)
+  - [Agent and Tools](#agent-and-tools)
   - [Additional Tools](#additional-tools)
 - [Future Enhancements](#-future-enhancements)
 - [Contributing](#-contributing)
@@ -25,13 +25,13 @@ This AI-powered chatbot operates seamlessly on any computer setup, incorporating
 - 💬 **Text-based Interaction**: Understands and responds to queries effectively
 - 🧠 **Context Awareness**: Maintains conversation context for relevant responses
 - 🔄 **Multiple Language Models**: Supports various LLM models for diverse use cases
-- 🤔 **Chain of Thought (CoT) Reasoning**: Enables step-by-step reasoning for complex queries
+- 🤖 **Agent-based Architecture**: Utilizes LangChain's React agent for advanced reasoning and tool use
 
 ### Document Management
 
 - 📄 **PDF Processing**: Reads, analyzes, and answers questions based on PDF documents
 - 📝 **Text Extraction**: Extracts text from uploaded documents for analysis
-- 📁 **Multi-format Support**: Handles PDFs, text files, images, PowerPoint, and Excel files (IN PROGRESS)
+- 📁 **Database Integration**: Supports both local file storage and external database connections
 
 ## 🛠️ Run Locally
 
@@ -52,44 +52,62 @@ This AI-powered chatbot operates seamlessly on any computer setup, incorporating
 
 ## 🔑 Environment Variables
 
+You can set up your environment variables using either a `.env` file or Streamlit secrets:
+
+### Option 1: Using a .env file
+
 Create a `.env` file in the root directory to store your API keys:
 
 | API Key | Type | Description | Get API Key |
 |---------|------|-------------|-------------|
 | `GROQ_API_KEY` | `string` | **Required** | [Create Groq API Key](https://console.groq.com/keys) |
 
+### Option 2: Using Streamlit Secrets (Recommended for Streamlit Cloud)
+
+If you're deploying your app on Streamlit Cloud, you can use Streamlit secrets to securely store your API keys:
+
+1. Create a file named `.streamlit/secrets.toml` in your project directory.
+2. Add your API key to this file:
+
+```toml
+groq_api_key = "your-api-key-here"
+```
+
+3. If deploying to Streamlit Cloud, add these secrets in the app settings.
+
+The chatbot will automatically use the API key from Streamlit secrets if available, falling back to prompting the user for input if not found.
+
+> Note: Never commit your `.env` file or `.streamlit/secrets.toml` to version control. Add them to your `.gitignore` file to prevent accidental exposure of your API keys.
+
 ## 🧰 Development Tools and Technologies
 
 ### Available LLM Models
 
-- 🧠 **Gemma Model 2 - 9B**: Google's open-source model, optimized for efficiency and performance
-- 🚀 **Gemma Model - 7B**: Smaller variant of Gemma, balancing speed and capability
 - 🐑 **LLaMA 3 - 70B**: Meta's largest model, excelling in complex reasoning and generation tasks
-- 🐑 **LLaMA 3 - 8B**: Compact LLaMA variant, suitable for resource-constrained environments
 - 🔄 **Mixtral - 8x7B**: Mistral AI's mixture-of-experts model, combining multiple specialized sub-models
+- 🔹 **Gemma 2 - 9B**: Google's instruction-tuned variant of the Gemma model family
 
-### 🧠 Chain of Thought (CoT) Reasoning
+### Agent and Tools
 
-This chatbot now supports Chain of Thought reasoning, allowing for more transparent and step-by-step problem-solving. When enabled, the chatbot will:
+The chatbot now uses LangChain's React agent with the following tools:
 
-1. 🤔 **Think**: Analyze the query and break it down into steps
-2. 📝 **Plan**: Outline a strategy to address the question
-3. 🔍 **Research**: Gather relevant information from its knowledge base
-4. 💡 **Reason**: Apply logical reasoning to the gathered information
-5. 🎯 **Conclude**: Formulate a final answer based on the reasoning process
+- 🌐 **Web Search**: Utilizes DuckDuckGo for current events and online information
+- 🧮 **Calculator**: Performs mathematical calculations
+- 💬 **Ask for Information**: Prompts the user for additional details when needed
+- 🗃️ **Database Query**: Executes SQL queries on connected databases (when available)
 
 ### Additional Tools
 
-- 🎙️ **Whisper Large V3**: Advanced spoken language processing
+- 🎙️ **Whisper Large V3**: Advanced spoken language processing (planned integration)
 
 ## 🔮 Future Enhancements
 
 - 📊 **Advanced Analytics**: User interaction insights
-- 🌐 **Web Navigation**: Browse and search web content
+- 🌐 **Web Navigation**: Improved web content browsing and search
 - 🖼️ **Multi-modal Interactions**: Combine text and visual inputs
-- 🗄️ **Database Integration**: 
-  - Connect to external databases for expanded knowledge access
-  - Support local file storage for personalized document management
+- 🗄️ **Enhanced Database Integration**: 
+  - Improved support for external databases
+  - Advanced querying and data analysis capabilities
 
 ## 🤝 Contributing
 
