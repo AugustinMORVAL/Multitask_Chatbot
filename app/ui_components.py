@@ -25,8 +25,24 @@ class UIComponents:
                 "groq_api_key": groq_api_key,
                 "sarpapi_api_key": sarpapi_api_key
             }
+    
+    def create_chat_history(self):
+        if st.session_state.langchain_messages:
+            for message in st.session_state.langchain_messages:
+                if isinstance(message, dict):
+                    # Handle dictionary-style messages
+                    role = message.get("role", "user")
+                    content = message.get("content", "")
+                else:
+                    # Handle LangChain message objects
+                    role = message.type if hasattr(message, 'type') else "user"
+                    content = message.content if hasattr(message, 'content') else str(message)
 
+                with st.chat_message(role):
+                    st.markdown(content)
+    
     def create_chat_interface(self, chatbot_manager):
+        self.create_chat_history()
         output_container = st.empty()
         user_input = st.chat_input("Type your message here...")
 
@@ -34,7 +50,7 @@ class UIComponents:
             output_container = output_container.container()
             output_container.chat_message("user").write(user_input)
 
-            answer_container = output_container.chat_message("assistant", avatar="🦜")
+            answer_container = output_container.chat_message("assistant")
             st_callback = StreamlitCallbackHandler(answer_container)
             cfg = RunnableConfig()
             cfg["callbacks"] = [st_callback]
@@ -51,4 +67,5 @@ class UIComponents:
         if st.sidebar.button("Clear Chat History"):
             st.session_state.clear()
             st.sidebar.success("Chat history cleared!")
+            st.rerun()
 

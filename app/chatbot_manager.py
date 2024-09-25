@@ -41,9 +41,9 @@ class ChatbotManager:
                 description="useful for when you need to answer questions about math",
             ),
             Tool(
-                name="User Input",
+                name="Ask for information",
                 func=self._ask_user,
-                description="useful when you need to ask the user for more information or clarification to give a better response",
+                description="Use this tool frequently to gather more information from the user. It's essential for clarification, obtaining specific details, or when you need additional context to provide a more accurate or comprehensive answer. Always use this tool when you don't know something or are unsure about any aspect of the user's query. Consider using it before making assumptions or providing incomplete answers.",
             )
         ]
         
@@ -71,12 +71,11 @@ class ChatbotManager:
             tools=self.tools,
             memory=self.memory,
             handle_parsing_errors=True,
-            max_iterations=5,  # Increased to allow for more interactions
+            max_iterations=8,
             early_stopping_method="generate"
         )
         
     def _ask_user(self, question):
-        print(f"\nAgent: {question}")
         return input("User: ")
 
     def get_response(self, user_input, cfg):
@@ -85,6 +84,3 @@ class ChatbotManager:
             return response
         except Exception as e:
             raise RuntimeError(f"Failed to get response: {e}")
-
-    def get_chat_history(self):
-        return self.memory.chat_memory.messages

@@ -4,7 +4,7 @@ from config import load_config
 # from pathlib import Path
 
 # Set up Streamlit page
-st.set_page_config(page_title="Chat with Groq", page_icon="🦜", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Chat with Groq", page_icon="img/logo.png", layout="wide", initial_sidebar_state="expanded")
 
 # Load configuration
 config = load_config()
