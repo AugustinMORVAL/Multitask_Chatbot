@@ -51,9 +51,19 @@ class ChatbotManager:
         ]
         
         if self.db_path:
-            creator = lambda: sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
-            db = SQLDatabase(create_engine("sqlite:///", creator=creator))
-            db_chain = SQLDatabaseChain.from_llm(self.llm, db)
+            if isinstance(self.db_path, str):
+                if self.db_path.startswith(('sqlite:///', 'mysql://', 'postgresql://')):
+                    # Handle URL path
+                    db = SQLDatabase.from_uri(self.db_path)
+                else:
+                    # Handle local file path
+                    creator = lambda: sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
+                    db = SQLDatabase(create_engine("sqlite:///", creator=creator))
+            else:
+                # Handle file-like object (e.g., uploaded file)
+                db = SQLDatabase.from_uri("sqlite:///:memory:", engine_args={"connect_args": {"uri": True}})
+
+            db_chain = SQLDatabaseChain.from_llm(self.llm, db, verbose=True)
             tools.append(
                 Tool(
                     name="Database Query",

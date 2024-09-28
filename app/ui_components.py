@@ -122,4 +122,5 @@ class UIComponents:
                 st.metric("External Database", "Connected" if st.session_state.external_database else "Not Connected")
                 
     def connect_external_database(self):
-        st.session_state.external_database = st.sidebar.text_input("External Database URL", disabled=True) or st.sidebar.button("Connect to External Database", disabled=True)
+        st.session_state.external_database = st.sidebar.text_input("External Database URL") or st.sidebar.file_uploader("Connect from file", type=["sql", "sqlite"])
+        return st.session_state.external_database
