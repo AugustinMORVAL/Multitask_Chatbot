@@ -10,8 +10,8 @@ class UIComponents:
         self.state = self._initialize_state()
         
     def _initialize_state(self):
-        if "database" not in st.session_state:
-            st.session_state.database = []
+        if "local_database" not in st.session_state:
+            st.session_state.local_database = []
         if "external_database" not in st.session_state:
             st.session_state.external_database = None
 
@@ -70,60 +70,42 @@ class UIComponents:
                     st.session_state.clear()
                     st.rerun()
             
-    def create_file_uploader(self):
-        uploaded_files = st.sidebar.file_uploader("Upload files", 
-                                                    type=["pdf"], 
-                                                        accept_multiple_files=True
-                                                        )
+    def create_file_uploader(self, name="Upload files"):
+        uploaded_files = st.file_uploader(
+            name,
+            type=["pdf"],
+            accept_multiple_files=True,
+            help="Select one or more files to upload"
+        )
         
-        current_files = [file['file'] for file in st.session_state.database]
-        for uploaded_file in uploaded_files:
-                if uploaded_file not in current_files:
+        if uploaded_files:
+            new_files_added = False
+            
+            for i, uploaded_file in enumerate(uploaded_files):
+                if uploaded_file not in [file['file'] for file in st.session_state.local_database]:
                     file_contents = uploaded_file.read()
-                    st.session_state.database.append({
+                    st.session_state.local_database.append({
                         "file": uploaded_file,
                         "content": file_contents,
                         "name": uploaded_file.name,
-                        "type": uploaded_file.type
+                        "type": uploaded_file.type,
+                        "timestamp": time.time() 
                     })
+                    new_files_added = True
             
-        st.session_state.database = [
-            file for file in st.session_state.database
-            if file['file'] in uploaded_files
-        ]
+            if new_files_added:
+                st.success(f"Successfully uploaded {len(uploaded_files)} file(s)!")
+                time.sleep(1)
+                st.rerun()
+        
+        # Clean up removed files
+        # st.session_state.local_database = [
+        #     file for file in st.session_state.local_database
+        #     if file['file'] in uploaded_files
+        # ]
+        
         return uploaded_files
 
-    def display_database(self):
-        if st.session_state.database or st.session_state.external_database:
-            st.sidebar.markdown("## 📚 Database Contents")
-            
-            if st.session_state.database:
-                st.sidebar.markdown(f"**Local Files:** {len(st.session_state.database)}")
-                with st.sidebar.expander("View Local Files", expanded=False):
-                    for file in st.session_state.database:
-                        file_type = file['type'].lower()
-                        icon = self.config['file_icons'].get(file_type, '📄')
-                        st.markdown(f"{icon} **{file['name']}**")
-                        st.caption(f"Type: {file_type}")
-                        st.caption(f"Size: {len(file['content'])} bytes")
-                        st.divider()
-            
-            if st.session_state.external_database:
-                st.sidebar.markdown(f"**External Database:** Connected")
-                with st.sidebar.expander("External Database Info", expanded=False):
-                    st.write(st.session_state.external_database)
-
-        # Main content area display
-
-        with st.expander("Database Overview", icon="📊", expanded=True):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.metric("Local Files", len(st.session_state.database))
-            
-            with col2:
-                st.metric("External Database", "Connected" if st.session_state.external_database else "Not Connected")
-                
     def create_database_connection(self):  
         # Database type selection
         db_type = st.sidebar.selectbox(
@@ -172,7 +154,6 @@ class UIComponents:
                     'database': st.sidebar.text_input("Database Name")
                 })
         
-        # Initialize db_manager in session state
         if "db_manager" not in st.session_state:
             st.session_state.db_manager = None
 
@@ -214,6 +195,20 @@ class UIComponents:
                     st.error(f"Last Error: {conn_info['last_error']}")
 
         # Database details
-        if st.session_state.external_database and st.session_state.db_manager:            
-            with st.sidebar.expander("Database Details", expanded=False):
-                st.write(st.session_state.external_database)
+        if st.session_state.local_database or st.session_state.external_database:
+            st.sidebar.markdown("## 📚 Database Contents")
+            
+            if st.session_state.local_database:
+                st.sidebar.markdown(f"**Local Files:**")
+                with st.sidebar.expander("Local Files Details", expanded=False):
+                    st.caption(f"**Local Files:** {len(st.session_state.local_database)}")
+                    for file in st.session_state.local_database:
+                        file_type = file['type'].lower()
+                        icon = self.config['file_icons'].get(file_type, '📄')
+                        st.markdown(f"{icon} **{file['name']}**")
+                        
+            if st.session_state.external_database:
+                st.sidebar.markdown(f"**External Database:**")
+                with st.sidebar.expander("Database Details", expanded=False):
+                    st.write(st.session_state.external_database)
+            
