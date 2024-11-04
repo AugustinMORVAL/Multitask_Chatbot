@@ -67,12 +67,24 @@ class DatabaseManager:
             "is_connected": self.is_connected
         }
 
+    def disconnect(self):
+        """Explicitly disconnect from the database."""
+        try:
+            self._manager.disconnect()
+            self.status = "disconnected"
+            self.connection_timestamp = None
+        except Exception as e:
+            self.status = "error"
+            self.last_error = str(e)
+            raise
+
 
 class SQLDatabaseManager:
     def __init__(self, database_type: str, connection_params: Dict[str, Any]):
         self.database_type = database_type
         self.connection_params = connection_params
         self.connection = None
+        self.engine = None
 
     def connect(self) -> Any:
         if self.is_connected:
@@ -96,9 +108,6 @@ class SQLDatabaseManager:
             )
             self.connection = self.engine.connect()
 
-            test_connection = self.engine.connect()
-            test_connection.close()
-            
             self.connection = self.engine.connect()
             return self.connection
             
@@ -124,6 +133,15 @@ class SQLDatabaseManager:
     @property
     def is_connected(self) -> bool:
         return self.connection is not None
+
+    def disconnect(self):
+        """Explicitly disconnect from the database."""
+        if self.connection:
+            self.connection.close()
+            self.connection = None
+        if self.engine:
+            self.engine.dispose()
+            self.engine = None
 
 
 class NoSQLDatabaseManager:
@@ -193,3 +211,13 @@ class NoSQLDatabaseManager:
     @property
     def is_connected(self) -> bool:
         return self.connection is not None
+
+    def disconnect(self):
+        """Explicitly disconnect from the database."""
+        if self.connection:
+            if self.database_type.lower() == 'mongodb':
+                self.connection.close()
+            elif self.database_type.lower() == 'qdrant':
+                # Qdrant client doesn't require explicit closure
+                pass
+            self.connection = None

@@ -28,13 +28,9 @@ with st.sidebar:
     api_keys = ui.enter_api_key()
     st.subheader("Model")
     model = st.selectbox("Select a model", config['models'])
-    st.subheader("**External Database**")
+    st.subheader("**Database**")
     external_database = ui.create_database_connection()
-    st.subheader("**Local Database**")
-    ui.create_file_uploader()
-    ui.clear_chat_history()
 
 # Main content
-ui.display_database()
 chatbot_manager = ChatbotManager(api_keys=api_keys, model=model, config=config, db_path=external_database)
 ui.create_chat_interface(chatbot_manager)

@@ -2,6 +2,7 @@ import streamlit as st
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
 from app.database_manager import DatabaseManager
+import time
 
 class UIComponents:
     def __init__(self, config):
@@ -43,6 +44,7 @@ class UIComponents:
     def create_chat_interface(self, chatbot_manager):
         self.create_chat_history()
         output_container = st.empty()
+        
         user_input = st.chat_input("Type your message here...")
 
         if user_input:
@@ -61,12 +63,12 @@ class UIComponents:
             except Exception as e:
                 st.error(f"An error occurred: {e}")
                 st.stop()
-
-    def clear_chat_history(self):
-        if st.sidebar.button("Clear Chat History"):
-            st.session_state.clear()
-            st.sidebar.success("Chat history cleared!")
-            st.rerun()
+        if st.session_state.langchain_messages:
+            col1, col2 = st.columns([3, 1])
+            with col2:
+                if st.button("Clear Chat History"):
+                    st.session_state.clear()
+                    st.rerun()
             
     def create_file_uploader(self):
         uploaded_files = st.sidebar.file_uploader("Upload files", 
@@ -170,30 +172,48 @@ class UIComponents:
                     'database': st.sidebar.text_input("Database Name")
                 })
         
-        db_manager = None
-        if st.sidebar.button("Connect"):
-            try:
-                db_manager = DatabaseManager(db_type, connection_params)
-                st.session_state.external_database = db_manager.create_connection()
-                st.sidebar.success("Successfully connected to database!")
-            except Exception as e:
-                st.sidebar.error(f"Failed to connect: {str(e)}")
+        # Initialize db_manager in session state
+        if "db_manager" not in st.session_state:
+            st.session_state.db_manager = None
 
-        # Add connection status monitoring
-        if st.session_state.external_database and db_manager: 
-            with st.sidebar.expander("Connection Status", expanded=True):
-                conn_info = db_manager.get_connection_info()
-                
-                status_color = {
-                    "connected": "green",
-                    "disconnected": "red",
-                    "error": "orange"
-                }.get(conn_info["status"], "gray")
-                
+        # Connection button and handling
+        col1, col2 = st.sidebar.columns(2)
+        with col1:
+            if st.button("Connect" if not st.session_state.external_database else "Disconnect"):
+                if not st.session_state.external_database:
+                    try:
+                        st.session_state.db_manager = DatabaseManager(db_type, connection_params)
+                        st.session_state.external_database = st.session_state.db_manager.create_connection()
+                        st.sidebar.success("Successfully connected to database!")
+                        time.sleep(1)
+                        st.rerun()
+                    except Exception as e:
+                        st.sidebar.error(f"Failed to connect: {str(e)}")
+                else:
+                    try:
+                        st.session_state.db_manager.disconnect()
+                        st.session_state.external_database = None
+                        st.session_state.db_manager = None
+                        st.sidebar.success("Successfully disconnected from database!")
+                        st.rerun()
+                    except Exception as e:
+                        st.sidebar.error(f"Failed to disconnect: {str(e)}")
+
+        # Connection status display - moved here and simplified
+        with st.sidebar.expander("Connection Status", expanded=True):
+            if st.session_state.db_manager is None:
+                st.markdown("Status: :red[●] Disconnected")
+            else:
+                conn_info = st.session_state.db_manager.get_connection_info()
+                status_color = "green" if conn_info["status"] == "connected" else "orange"
                 st.markdown(f"Status: :{status_color}[●] {conn_info['status'].title()}")
                 
                 if conn_info["connected_since"]:
                     st.caption(f"Connected since: {conn_info['connected_since'].strftime('%Y-%m-%d %H:%M:%S')}")
-                
                 if conn_info["last_error"]:
                     st.error(f"Last Error: {conn_info['last_error']}")
+
+        # Database details
+        if st.session_state.external_database and st.session_state.db_manager:            
+            with st.sidebar.expander("Database Details", expanded=False):
+                st.write(st.session_state.external_database)
