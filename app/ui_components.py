@@ -1,6 +1,7 @@
 import streamlit as st
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
+from app.database_manager import DatabaseManager
 
 class UIComponents:
     def __init__(self, config):
@@ -121,6 +122,78 @@ class UIComponents:
             with col2:
                 st.metric("External Database", "Connected" if st.session_state.external_database else "Not Connected")
                 
-    def connect_external_database(self):
-        st.session_state.external_database = st.sidebar.text_input("External Database URL") or st.sidebar.file_uploader("Connect from file", type=["sql", "sqlite"])
-        return st.session_state.external_database
+    def create_database_connection(self):  
+        # Database type selection
+        db_type = st.sidebar.selectbox(
+            "Select Database Type",
+            options=["MySQL", "SQLite", "PostgreSQL", "MongoDB", "Qdrant"]
+        )
+        
+        # Connection method
+        connection_method = st.sidebar.radio(
+            "Connection Method",
+            options=["File", "URL", "Custom"]
+        )
+        
+        connection_params = {}
+        
+        if connection_method == "File":
+            uploaded_file = st.sidebar.file_uploader(
+                "Upload Database File",
+                type=["db", "sqlite", "sqlite3"] if db_type == "SQLite" else None
+            )
+            if uploaded_file:
+                connection_params['file_path'] = uploaded_file
+                
+        elif connection_method == "URL":
+            connection_params['url'] = st.sidebar.text_input("Database URL")
+            if db_type == "Qdrant":
+                connection_params['api_key'] = st.sidebar.text_input("API Key", type="password")
+                
+        else:  # Custom
+            default_ports = {
+                "MySQL": 3306,
+                "PostgreSQL": 5432,
+                "MongoDB": 27017,
+                "Qdrant": 6333
+            }
+            if db_type != "SQLite":
+                connection_params.update({
+                    'host': st.sidebar.text_input("Host"),
+                    'port': st.sidebar.number_input("Port", value=default_ports.get(db_type, 0)),
+                    'username': st.sidebar.text_input("Username"),
+                    'password': st.sidebar.text_input("Password", type="password"),
+                    'database': st.sidebar.text_input("Database Name")
+                })
+            else:
+                connection_params.update({
+                    'database': st.sidebar.text_input("Database Name")
+                })
+        
+        db_manager = None
+        if st.sidebar.button("Connect"):
+            try:
+                db_manager = DatabaseManager(db_type, connection_params)
+                st.session_state.external_database = db_manager.create_connection()
+                st.sidebar.success("Successfully connected to database!")
+            except Exception as e:
+                st.sidebar.error(f"Failed to connect: {str(e)}")
+
+        # Add connection status monitoring
+        if st.session_state.external_database and db_manager: 
+            with st.sidebar.expander("Connection Status", expanded=True):
+                conn_info = db_manager.get_connection_info()
+                
+                status_color = {
+                    "connected": "green",
+                    "disconnected": "red",
+                    "error": "orange"
+                }.get(conn_info["status"], "gray")
+                
+                st.markdown(f"Status: :{status_color}[●] {conn_info['status'].title()}")
+                
+                if conn_info["connected_since"]:
+                    st.caption(f"Connected since: {conn_info['connected_since'].strftime('%Y-%m-%d %H:%M:%S')}")
+                
+                if conn_info["last_error"]:
+                    st.error(f"Last Error: {conn_info['last_error']}")

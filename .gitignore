@@ -3,3 +3,4 @@
 __pycache__
 test*
 .streamlit/secrets.toml
+old

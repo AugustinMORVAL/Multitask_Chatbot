@@ -1,6 +1,13 @@
 import streamlit as st
 from app import ChatbotManager, UIComponents
 from config import load_config
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Add this line after load_dotenv()
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
 
 st.set_page_config(
     page_title="Chat with Groq",
@@ -22,8 +29,8 @@ with st.sidebar:
     st.subheader("Model")
     model = st.selectbox("Select a model", config['models'])
     st.subheader("**External Database**")
-    external_database = ui.connect_external_database()
-    st.subheader("Local Database")
+    external_database = ui.create_database_connection()
+    st.subheader("**Local Database**")
     ui.create_file_uploader()
     ui.clear_chat_history()
 

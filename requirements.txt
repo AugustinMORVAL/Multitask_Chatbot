@@ -10,6 +10,8 @@ langchain-experimental
 langchain-groq
 # Database
 sqlalchemy
+pymongo
+qdrant-client
 # Maths
 numexpr
 # Search
@@ -22,3 +24,4 @@ sentence-transformers
 python-pptx
 pytesseract
 openpyxl
+
