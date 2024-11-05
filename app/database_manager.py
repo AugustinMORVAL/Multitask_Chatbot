@@ -218,6 +218,5 @@ class NoSQLDatabaseManager:
             if self.database_type.lower() == 'mongodb':
                 self.connection.close()
             elif self.database_type.lower() == 'qdrant':
-                # Qdrant client doesn't require explicit closure
                 pass
             self.connection = None

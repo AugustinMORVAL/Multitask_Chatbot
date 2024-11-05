@@ -3,19 +3,23 @@ from langchain.agents import AgentExecutor, Tool, create_react_agent
 from langchain.chains import LLMMathChain
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
-from langchain_community.utilities import DuckDuckGoSearchAPIWrapper, SQLDatabase
-from langchain_experimental.sql import SQLDatabaseChain
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 from langchain_groq import ChatGroq
-from sqlalchemy import create_engine
-import sqlite3
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+from langchain_core.output_parsers import StrOutputParser
 
 class ChatbotManager:
-    def __init__(self, api_keys : dict, config, model="llama3-70b-8192", db_path=None):
+    def __init__(self, api_keys : dict, config, model="llama3-70b-8192"):
         self.api_keys = api_keys
-        self.db_path = db_path
         self.config = config
         self.model = model
-        self.llm = ChatGroq(api_key=api_keys['groq_api_key'], model=model, streaming=True)
+        self.llm = ChatGroq(
+            api_key=api_keys['groq_api_key'], 
+            model=model, 
+            streaming=True,
+            system_prompt=config['system_prompt']['value']
+        )
         self.msgs = StreamlitChatMessageHistory(key="langchain_messages")
         self.memory = ConversationBufferMemory(chat_memory=self.msgs, return_messages=True, memory_key="chat_history", output_key="output")
         self.tools = self._initialize_tools()
@@ -50,27 +54,6 @@ class ChatbotManager:
             )
         ]
         
-        if self.db_path:
-            if isinstance(self.db_path, str):
-                if self.db_path.startswith(('sqlite:///', 'mysql://', 'postgresql://')):
-                    # Handle URL path
-                    db = SQLDatabase.from_uri(self.db_path)
-                else:
-                    # Handle local file path
-                    creator = lambda: sqlite3.connect(f"file:{self.db_path}?mode=ro", uri=True)
-                    db = SQLDatabase(create_engine("sqlite:///", creator=creator))
-            else:
-                # Handle file-like object (e.g., uploaded file)
-                db = SQLDatabase.from_uri("sqlite:///:memory:", engine_args={"connect_args": {"uri": True}})
-
-            db_chain = SQLDatabaseChain.from_llm(self.llm, db, verbose=True)
-            tools.append(
-                Tool(
-                    name="Database Query",
-                    func=db_chain.run,
-                    description="useful for when you need to answer questions about the database. Input should be in the form of a question containing full context",
-                )
-            )
         return tools
 
     def _initialize_agent(self):
@@ -98,3 +81,53 @@ class ChatbotManager:
             return response
         except Exception as e:
             raise RuntimeError(f"Failed to get response: {e}")
+        
+    def document_retrieval(self, vector_store, input_query):
+        """Retrieve relevant documents and generate a response from the AI model."""
+        try:
+            template = """
+            Tu es une assistante virtuelle serviable et dévouée. Ton rôle principal est d'aider l'utilisateur en fournissant 
+            des réponses précises et réfléchies basées sur le contexte donné. Si l'utilisateur pose des questions liées aux 
+            informations fournies, réponds de manière courtoise et professionnelle.
+
+            IMPORTANT: Tu dois TOUJOURS répondre en français, quelle que soit la langue de la question.
+
+            Contexte:
+            {context}
+
+            Question: {question}
+
+            Instructions supplémentaires:
+            - Utilise un langage professionnel mais accessible
+            - Si tu ne trouves pas l'information dans le contexte, dis-le poliment
+            - Reste toujours factuel et basé sur le contexte fourni
+            """
+            
+            # Create a chat prompt template based on the defined template
+            prompt = ChatPromptTemplate.from_template(template)
+
+            # Configure retriever
+            retriever = vector_store.as_retriever(
+                search_type="similarity", search_kwargs={"k": 4}
+            )
+
+            # Set up parallel execution to retrieve context and pass it with the question
+            setup_and_retrieval = RunnableParallel(
+                {"context": retriever, "question": RunnablePassthrough()}
+            )
+
+            # Initialize the Groq model
+            model = self.llm
+
+            # Define an output parser to handle the response formatting
+            output_parser = StrOutputParser()
+
+            # Chain the setup, prompt, model, and output parsing into one pipeline
+            rag_chain = setup_and_retrieval | prompt | model | output_parser
+
+            # Generate and return the response using the input query
+            response = rag_chain.invoke(input_query)
+            return response
+
+        except Exception as ex:
+            return f"Erreur: {str(ex)}"

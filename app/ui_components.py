@@ -2,6 +2,7 @@ import streamlit as st
 from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_core.runnables import RunnableConfig
 from app.database_manager import DatabaseManager
+from app.document_processor import DocumentProcessor
 import time
 
 class UIComponents:
@@ -14,6 +15,8 @@ class UIComponents:
             st.session_state.local_database = []
         if "external_database" not in st.session_state:
             st.session_state.external_database = None
+        if "db_manager" not in st.session_state:
+            st.session_state.db_manager = None
 
     def enter_api_key(self):
         if "groq_api_key" in st.secrets:
@@ -70,7 +73,7 @@ class UIComponents:
                     st.session_state.clear()
                     st.rerun()
             
-    def create_file_uploader(self, name="Upload files"):
+    def create_file_uploader(self, name="Upload files"):    
         uploaded_files = st.file_uploader(
             name,
             type=["pdf"],
@@ -79,33 +82,33 @@ class UIComponents:
         )
         
         if uploaded_files:
-            new_files_added = False
+            existing_files = {file['name'] for file in st.session_state.local_database}
+            new_files = [f for f in uploaded_files if f.name not in existing_files]
             
-            for i, uploaded_file in enumerate(uploaded_files):
-                if uploaded_file not in [file['file'] for file in st.session_state.local_database]:
-                    file_contents = uploaded_file.read()
-                    st.session_state.local_database.append({
-                        "file": uploaded_file,
-                        "content": file_contents,
-                        "name": uploaded_file.name,
-                        "type": uploaded_file.type,
-                        "timestamp": time.time() 
-                    })
-                    new_files_added = True
-            
-            if new_files_added:
-                st.success(f"Successfully uploaded {len(uploaded_files)} file(s)!")
-                time.sleep(1)
-                st.rerun()
+            if new_files:
+                self._process_pdf_files(new_files)
+                
+            return new_files
         
-        # Clean up removed files
-        # st.session_state.local_database = [
-        #     file for file in st.session_state.local_database
-        #     if file['file'] in uploaded_files
-        # ]
+    def _process_pdf_files(self, new_files):
         
-        return uploaded_files
-
+        doc_processor = DocumentProcessor()
+        chunks = doc_processor.chunk_pdf(new_files)
+        
+        # Store files and their chunks in local_database
+        for uploaded_file in new_files:
+            file_chunks = [c for c in chunks if c.metadata["file_name"] == uploaded_file.name]
+            st.session_state.local_database.append({
+                "file": uploaded_file,
+                "name": uploaded_file.name,
+                "type": uploaded_file.type,
+                "timestamp": time.time(),
+                "chunks": file_chunks
+            })
+            st.success(f"Successfully uploaded and processed {uploaded_file.name}!")
+            # st.session_state.new_files_added.append(uploaded_file.name)
+            # st.rerun()
+                    
     def create_database_connection(self):  
         # Database type selection
         db_type = st.sidebar.selectbox(
@@ -153,9 +156,6 @@ class UIComponents:
                 connection_params.update({
                     'database': st.sidebar.text_input("Database Name")
                 })
-        
-        if "db_manager" not in st.session_state:
-            st.session_state.db_manager = None
 
         # Connection button and handling
         col1, col2 = st.sidebar.columns(2)
@@ -194,9 +194,10 @@ class UIComponents:
                 if conn_info["last_error"]:
                     st.error(f"Last Error: {conn_info['last_error']}")
 
-        # Database details
+    def create_database_details(self):
         if st.session_state.local_database or st.session_state.external_database:
-            st.sidebar.markdown("## 📚 Database Contents")
+            st.divider()
+            st.sidebar.subheader("📚 Database Contents")
             
             if st.session_state.local_database:
                 st.sidebar.markdown(f"**Local Files:**")
@@ -211,4 +212,3 @@ class UIComponents:
                 st.sidebar.markdown(f"**External Database:**")
                 with st.sidebar.expander("Database Details", expanded=False):
                     st.write(st.session_state.external_database)
-            
