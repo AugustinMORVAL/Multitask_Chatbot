@@ -24,11 +24,8 @@ processor = DocumentProcessor()
 # Sidebar
 with st.sidebar:
     st.logo("img/logo.png")
-    st.title("Chat Settings")
+    st.title("🔌 **Database Connection**")
     api_keys = ui.enter_api_key()
-    st.subheader("Model")
-    model = st.selectbox("Select a model", config['models'])
-    st.subheader("**Database**")
     external_database = ui.create_database_connection()
     database_details = ui.create_database_details()
 
@@ -48,5 +45,5 @@ else:
     else:
         st.warning("Please connect to a database first to upload files there.")
 
-chatbot_manager = ChatbotManager(api_keys=api_keys, model=model, config=config)
+chatbot_manager = ChatbotManager(api_keys=api_keys, config=config)
 ui.create_chat_interface(chatbot_manager)

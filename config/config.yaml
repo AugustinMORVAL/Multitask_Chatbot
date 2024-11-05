@@ -1,7 +1,68 @@
 models:
-  - llama3-70b-8192
-  - mixtral-8x7b-32768
-  - gemma2-9b-it
+  llama-3.1-70b-versatile:
+    context_window: 32768
+    description: |
+      High-performance large language model optimized for complex tasks and reasoning.
+      Best suited for tasks requiring deep understanding, analysis, and sophisticated outputs.
+      Excellent choice when quality is prioritized over speed.
+    use_case:
+      - "Complex analysis and research"
+      - "In-depth explanations"
+      - "Advanced problem-solving"
+      - "Academic writing"
+      - "Complex code review"
+      - "Technical documentation"
+      - "Research synthesis"
+
+  llama-3.1-8b-instant:
+    context_window: 131072
+    description: |
+      Lightweight, efficient model optimized for speed and basic tasks.
+      Excellent for quick queries and simple information retrieval.
+      Provides fast, concise responses with minimal latency.
+    use_case:
+      - "Quick fact checking"
+      - "Simple calculations"
+      - "Basic Q&A"
+      - "Data validation"
+      - "Short summaries"
+      - "Simple classifications"
+
+  llama-3.2-90b-vision-preview:
+    context_window: 8192
+    description: |
+      Multimodal model specialized in vision-language tasks.
+      Excellent for image understanding and visual reasoning.
+      Can process and analyze images alongside text.
+    use_case:
+      - "Image analysis"
+      - "Visual question answering"
+      - "Image-based troubleshooting"
+      - "Chart/diagram interpretation"
+      - "Visual content description"
+
+models_selection_criteria:
+  priority_factors:
+    - task_complexity:
+        simple: "llama-3.1-8b-instant"
+        moderate: "llama-3.1-70b-versatile"
+        complex: "llama-3.1-70b-versatile"
+    
+    - response_speed:
+        critical: "llama-3.1-8b-instant"
+        moderate: "llama-3.1-70b-versatile"
+        flexible: "llama-3.1-70b-versatile"
+    
+    - context_length:
+        short: "any"
+        medium: "llama-3.1-70b-versatile"
+        long: "llama-3.1-8b-instant"
+    
+    - task_type:
+        coding: "llama-3.1-70b-versatile"
+        visual: "llama-3.2-90b-vision-preview"
+        analysis: "llama-3.1-70b-versatile"
+        quick_lookup: "llama-3.1-8b-instant"
 
 system_prompt:
   value: |
@@ -31,15 +92,6 @@ file_icons:
   audio/flac: 🔉
   audio/aac: 🎶
   audio/m4a: 🎙️
-
-
-
-
-
-
-
-
-
 
 temperature_slider:
   min_value: 0.0

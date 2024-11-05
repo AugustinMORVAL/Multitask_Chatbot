@@ -197,10 +197,10 @@ class UIComponents:
     def create_database_details(self):
         if st.session_state.local_database or st.session_state.external_database:
             st.divider()
-            st.sidebar.subheader("📚 Database Contents")
+            st.sidebar.title("📚 Database Contents")
             
             if st.session_state.local_database:
-                st.sidebar.markdown(f"**Local Files:**")
+                st.sidebar.subheader(f"**Local Files:**")
                 with st.sidebar.expander("Local Files Details", expanded=False):
                     st.caption(f"**Local Files:** {len(st.session_state.local_database)}")
                     for file in st.session_state.local_database:
@@ -209,6 +209,6 @@ class UIComponents:
                         st.markdown(f"{icon} **{file['name']}**")
                         
             if st.session_state.external_database:
-                st.sidebar.markdown(f"**External Database:**")
+                st.sidebar.subheader(f"**External Database:**")
                 with st.sidebar.expander("Database Details", expanded=False):
                     st.write(st.session_state.external_database)
