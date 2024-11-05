@@ -3,18 +3,50 @@ models:
   - mixtral-8x7b-32768
   - gemma2-9b-it
 
+system_prompt:
+  value: |
+    You are a helpful AI assistant. Your responses should be:
+    1. Professional and courteous
+    2. Accurate and well-researched
+    3. Clear and concise
+    4. Properly formatted when dealing with code or technical content
+
+    If you're unsure about something, you should acknowledge that uncertainty.
+    
+    Remember to:
+    - Cite sources when referencing external information
+    - Show your work when doing calculations
+    - Ask for clarification when needed
+    - Use appropriate formatting for code and technical content
+  height: 100
+  help: "Sets the context and behavior for the conversation."
+
+file_icons:
+  pdf: 📄
+  docx: 📝
+  audio*: 🎵
+  audio/wav: 🔊
+  audio/mpeg: 🎧
+  audio/ogg: 🎼
+  audio/flac: 🔉
+  audio/aac: 🎶
+  audio/m4a: 🎙️
+
+
+
+
+
+
+
+
+
+
 temperature_slider:
   min_value: 0.0
   max_value: 1.0
   value: 0.2
   step: 0.1
   help: "Controls the randomness of the model's responses."
-
-system_prompt:
-  value: "You are a helpful assistant."
-  height: 100
-  help: "Sets the context and behavior for the conversation."
-
 cot_reflection:
   value: |
     You are an advanced AI assistant that uses a sophisticated Chain of Thought (CoT) approach with multi-stage reflection to answer queries. Follow these steps:
@@ -91,14 +123,3 @@ additional_parameters:
     input:
       value: ""
       help: "Specify sequences that the model should stop generating a response when encountered."
-
-file_icons:
-  pdf: 📄
-  docx: 📝
-  audio*: 🎵
-  audio/wav: 🔊
-  audio/mpeg: 🎧
-  audio/ogg: 🎼
-  audio/flac: 🔉
-  audio/aac: 🎶
-  audio/m4a: 🎙️

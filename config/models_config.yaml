@@ -1,0 +1,107 @@
+Meta:
+  llama-3.1-70b-versatile:
+    context_window: 32768
+    description: "Largest and most capable Llama 3.1 model, good for complex tasks"
+    use_case:
+      - "General purpose"
+      - "Complex reasoning"
+      - "Code generation"
+  
+  llama-3.1-8b-instant:
+    context_window: 131072
+    description: "Smaller, faster model with very large context window"
+    use_case:
+      - "Fast inference"
+      - "Long document processing"
+  
+  llama-3.2-90b-text-preview:
+    context_window: 8192
+    description: "Latest and largest Llama text model"
+    use_case:
+      - "Advanced text generation"
+      - "Complex reasoning"
+  
+  llama-3.2-90b-vision-preview:
+    context_window: 8192
+    description: "Multimodal version of 90B model"
+    use_case:
+      - "Image understanding"
+      - "Visual reasoning"
+  
+  llama-guard-3-8b:
+    context_window: 8192
+    description: "Specialized in content moderation and safety"
+    use_case:
+      - "Content filtering"
+      - "Safety checks"
+
+Groq:
+  llama3-groq-8b-8192-tool-use-preview:
+    context_window: 8192
+    description: "Optimized for tool use and function calling"
+    use_case:
+      - "API integration"
+      - "Tool use"
+      - "Function calling"
+  
+  llama3-groq-70b-8192-tool-use-preview:
+    context_window: 8192
+    description: "Larger model optimized for tool use"
+    use_case:
+      - "Complex tool use"
+      - "Advanced API integration"
+
+Google:
+  gemma-7b-it:
+    context_window: 8192
+    description: "Google's efficient base model"
+    use_case:
+      - "General purpose"
+      - "Efficient inference"
+  
+  gemma2-9b-it:
+    context_window: 8192
+    description: "Improved version of Gemma"
+    use_case:
+      - "General purpose"
+      - "Better reasoning"
+
+OpenAI:
+  whisper-large-v3:
+    context_window: 448
+    description: "Advanced speech recognition model"
+    use_case:
+      - "Speech-to-text"
+      - "Audio transcription"
+  
+  whisper-large-v3-turbo:
+    context_window: 448
+    description: "Faster version of Whisper v3"
+    use_case:
+      - "Real-time transcription"
+      - "Fast audio processing"
+
+Mistral AI:
+  mixtral-8x7b-32768:
+    context_window: 32768
+    description: "Mixture of Experts (MoE) model with large context"
+    use_case:
+      - "General purpose"
+      - "Long context understanding"
+      - "Efficient scaling"
+
+Hugging Face:
+  distil-whisper-large-v3-en:
+    context_window: 448
+    description: "Distilled version of Whisper for English"
+    use_case:
+      - "English speech recognition"
+      - "Efficient transcription"
+
+Other:
+  llava-v1.5-7b-4096-preview:
+    context_window: 4096
+    description: "Vision-language model"
+    use_case:
+      - "Image understanding"
+      - "Visual Q&A" 
