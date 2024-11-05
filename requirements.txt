@@ -6,6 +6,7 @@ python-dotenv
 langchain
 langchain-core
 langchain-community
+langchain-huggingface
 langchain-experimental
 langchain-groq
 # Database
