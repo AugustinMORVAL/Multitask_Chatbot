@@ -21,7 +21,7 @@ class ChatbotManager:
         self.model_specs = self._get_model_specs()
 
     def _initialize_tools(self):
-        default_model = "llama-3.1-70b-versatile"
+        default_model = "llama-3.3-70b-versatile"
         self.llm = ChatGroq(
             api_key=self.api_keys['groq_api_key'],
             model=default_model,
