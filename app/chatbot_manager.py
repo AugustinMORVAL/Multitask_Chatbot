@@ -75,7 +75,7 @@ class ChatbotManager:
             
             # Parse the response to get the selected model
             model_match = re.search(r'<model>(.*?)</model>', selection_text)
-            selected_model = model_match.group(1) if model_match else "llama-3.1-70b-versatile"
+            selected_model = model_match.group(1) if model_match else "llama-3.3-70b-versatile"
             
             # Initialize LLM with selected model
             llm = ChatGroq(

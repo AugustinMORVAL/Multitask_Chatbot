@@ -1,5 +1,5 @@
 models:
-  llama-3.1-70b-versatile:
+  llama-3.3-70b-versatile:
     context_window: 32768
     description: |
       High-performance large language model optimized for complex tasks and reasoning.
@@ -45,23 +45,23 @@ models_selection_criteria:
   priority_factors:
     - task_complexity:
         simple: "llama-3.1-8b-instant"
-        moderate: "llama-3.1-70b-versatile"
-        complex: "llama-3.1-70b-versatile"
+        moderate: "llama-3.3-70b-versatile"
+        complex: "llama-3.3-70b-versatile"
     
     - response_speed:
         critical: "llama-3.1-8b-instant"
-        moderate: "llama-3.1-70b-versatile"
-        flexible: "llama-3.1-70b-versatile"
+        moderate: "llama-3.3-70b-versatile"
+        flexible: "llama-3.3-70b-versatile"
     
     - context_length:
         short: "any"
-        medium: "llama-3.1-70b-versatile"
+        medium: "llama-3.3-70b-versatile"
         long: "llama-3.1-8b-instant"
     
     - task_type:
-        coding: "llama-3.1-70b-versatile"
+        coding: "llama-3.3-70b-versatile"
         visual: "llama-3.2-90b-vision-preview"
-        analysis: "llama-3.1-70b-versatile"
+        analysis: "llama-3.3-70b-versatile"
         quick_lookup: "llama-3.1-8b-instant"
 
 system_prompt:
