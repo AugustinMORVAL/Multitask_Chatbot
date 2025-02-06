@@ -33,11 +33,9 @@ class UIComponents:
         if st.session_state.langchain_messages:
             for message in st.session_state.langchain_messages:
                 if isinstance(message, dict):
-                    # Handle dictionary-style messages
                     role = message.get("role", "user")
                     content = message.get("content", "")
                 else:
-                    # Handle LangChain message objects
                     role = message.type if hasattr(message, 'type') else "user"
                     content = message.content if hasattr(message, 'content') else str(message)
 
@@ -48,6 +46,8 @@ class UIComponents:
         self.create_chat_history()
         output_container = st.empty()
         
+        use_documents = st.checkbox("Use shared documents for context", value=False)
+
         user_input = st.chat_input("Type your message here...")
 
         if user_input:
@@ -60,12 +60,16 @@ class UIComponents:
             cfg["callbacks"] = [st_callback]
 
             try:
-                # Get the response and simulate the callback
-                answer = chatbot_manager.get_response(user_input, cfg)
-                answer_container.write(answer["output"])
+                if use_documents:
+                    response = chatbot_manager.document_retrieval(st.session_state.local_database, user_input)
+                else:
+                    response = chatbot_manager.get_response(user_input, cfg)
+                
+                answer_container.write(response["output"])
             except Exception as e:
                 st.error(f"An error occurred: {e}")
                 st.stop()
+
         if st.session_state.langchain_messages:
             col1, col2 = st.columns([3, 1])
             with col2:
@@ -95,7 +99,6 @@ class UIComponents:
         doc_processor = DocumentProcessor()
         chunks = doc_processor.chunk_pdf(new_files)
         
-        # Store files and their chunks in local_database
         for uploaded_file in new_files:
             file_chunks = [c for c in chunks if c.metadata["file_name"] == uploaded_file.name]
             st.session_state.local_database.append({
@@ -180,7 +183,7 @@ class UIComponents:
                     except Exception as e:
                         st.sidebar.error(f"Failed to disconnect: {str(e)}")
 
-        # Connection status display - moved here and simplified
+        # Connection status display
         with st.sidebar.expander("Connection Status", expanded=True):
             if st.session_state.db_manager is None:
                 st.markdown("Status: :red[●] Disconnected")
