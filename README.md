@@ -4,6 +4,8 @@
 
 This AI-powered chatbot is built with Streamlit and integrates with Groq's API. It provides a user-friendly interface for text-based interactions, document processing and database connectivity.
 
+![Chatbot Interface](src/img/preview.png)
+
 ## Table of Contents
 - [Overview](#overview)
 - [Features](#-features)
