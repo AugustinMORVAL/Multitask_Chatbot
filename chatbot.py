@@ -52,24 +52,6 @@ def setup_components(config):
         st.error("⚠️ Failed to initialize application components. Please refresh the page.")
         st.stop()
 
-def handle_file_upload(ui, upload_destination):
-    """Handle file uploads based on destination."""
-    try:
-        if upload_destination == "Local Storage":
-            uploaded_files = ui.create_file_uploader("📄 Upload documents to local storage")
-            if uploaded_files:
-                logger.info(f"Processing {len(uploaded_files)} files for local storage")
-        else:
-            if st.session_state.external_database:
-                uploaded_files = ui.create_file_uploader("📄 Upload documents to database")
-                if uploaded_files:
-                    logger.info(f"Processing {len(uploaded_files)} files for database storage")
-            else:
-                st.warning("⚠️ Please connect to a database first to upload files there.")
-    except Exception as e:
-        logger.error(f"File upload error: {e}")
-        st.error("⚠️ An error occurred during file upload. Please try again.")
-
 def main():
     """Main application entry point."""
     try:
@@ -93,16 +75,6 @@ def main():
         
         st.title("💬 Your personal AI assistant")
         st.markdown("Powered by Groq")
-        
-        # col1, col2 = st.columns([3, 1])
-        # with col1:
-        #     upload_destination = st.radio(
-        #         "Document Storage:",
-        #         options=["Local Storage", "Connected Database"],
-        #         disabled=not st.session_state.external_database,
-        #         help="Store documents locally or in the connected database"
-        #     )
-        # handle_file_upload(ui, upload_destination)
         
         try:
             chatbot_manager = ChatbotManager(api_keys=api_keys, config=config)

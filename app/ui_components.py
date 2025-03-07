@@ -53,18 +53,9 @@ class UIComponents:
     def create_chat_interface(self, chatbot_manager):
         self.create_chat_history()
         
-        col1, col2 = st.columns([3, 1])
-        with col1:
-            use_documents = st.checkbox("Use document context", value=False)
-            if use_documents:
-                self._show_document_context()
-        
-        with col2:
-            self._show_chat_controls()
-        
         user_input = st.chat_input("Type your message here...")
         if user_input:
-            self._handle_user_input(user_input, chatbot_manager, use_documents)
+            self._handle_user_input(user_input, chatbot_manager)
     
     def _show_document_context(self):
         if not st.session_state.local_database:
@@ -108,7 +99,7 @@ class UIComponents:
                 st.session_state.clear()
                 st.rerun()
     
-    def _handle_user_input(self, user_input, chatbot_manager, use_documents):
+    def _handle_user_input(self, user_input, chatbot_manager, use_documents=False):
         output_container = st.empty()
         output_container.chat_message("user").write(user_input)
 
