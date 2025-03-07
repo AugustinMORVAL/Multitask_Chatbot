@@ -11,6 +11,9 @@ class UIComponents:
         self.state = self._initialize_state()
         
     def _initialize_state(self):
+        """Initialize all necessary session state variables."""
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
         if "local_database" not in st.session_state:
             st.session_state.local_database = None
         if "external_database" not in st.session_state:
@@ -38,17 +41,10 @@ class UIComponents:
         return {"groq_api_key": groq_api_key}
     
     def create_chat_history(self):
-        if st.session_state.langchain_messages:
-            for message in st.session_state.langchain_messages:
-                if isinstance(message, dict):
-                    role = message.get("role", "user")
-                    content = message.get("content", "")
-                else:
-                    role = message.type if hasattr(message, 'type') else "user"
-                    content = message.content if hasattr(message, 'content') else str(message)
-
-                with st.chat_message(role):
-                    st.markdown(content)
+        """Display chat history from session state."""
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
     
     def create_chat_interface(self, chatbot_manager):
         self.create_chat_history()
@@ -94,34 +90,38 @@ class UIComponents:
             progress_bar.empty()
     
     def _show_chat_controls(self):
-        if st.session_state.langchain_messages:
+        if st.session_state.messages:
             if st.button("Clear Chat History"):
                 st.session_state.clear()
                 st.rerun()
     
     def _handle_user_input(self, user_input, chatbot_manager, use_documents=False):
-        output_container = st.empty()
-        output_container.chat_message("user").write(user_input)
+        """Handle user input and display the response."""
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        
+        with st.chat_message("user"):
+            st.markdown(user_input)
 
-        answer_container = output_container.chat_message("assistant")
-        st_callback = StreamlitCallbackHandler(answer_container)
-        cfg = RunnableConfig()
-        cfg["callbacks"] = [st_callback]
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            st_callback = StreamlitCallbackHandler(message_placeholder)
+            cfg = RunnableConfig()
+            cfg["callbacks"] = [st_callback]
 
-        try:
-            if use_documents:
-                if not st.session_state.local_database:
-                    answer_container.warning("No documents are loaded for context. Proceeding with standard response.")
-                    response = chatbot_manager.get_response(user_input, cfg)
-                else:
+            try:
+                if use_documents and st.session_state.local_database:
                     response = chatbot_manager.document_retrieval(st.session_state.local_database, user_input)
-            else:
-                response = chatbot_manager.get_response(user_input, cfg)
+                else:
+                    response = chatbot_manager.get_response(user_input, cfg)
             
-            answer_container.write(response["output"])
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-            st.stop()
+                st.session_state.messages.append({"role": "assistant", "content": response["output"]})
+                message_placeholder.markdown(response["output"])
+                
+            except Exception as e:
+                error_message = f"An error occurred: {str(e)}"
+                st.session_state.messages.append({"role": "assistant", "content": error_message})
+                st.error(error_message)
+                st.stop()
 
     def create_file_uploader(self, name="Upload files"):    
         uploaded_files = st.file_uploader(
