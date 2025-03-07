@@ -12,12 +12,20 @@ class UIComponents:
         
     def _initialize_state(self):
         if "local_database" not in st.session_state:
-            st.session_state.local_database = []
+            st.session_state.local_database = None
         if "external_database" not in st.session_state:
             st.session_state.external_database = None
         if "db_manager" not in st.session_state:
             st.session_state.db_manager = None
-
+        if "document_stats" not in st.session_state:
+            st.session_state.document_stats = {
+                "total_documents": 0,
+                "total_chunks": 0,
+                "processed_files": set(),
+                "last_update": None,
+                "file_details": {}
+            }
+            
     def enter_api_key(self):
         if "groq_api_key" in st.secrets:
             groq_api_key = st.secrets.groq_api_key
@@ -44,39 +52,86 @@ class UIComponents:
     
     def create_chat_interface(self, chatbot_manager):
         self.create_chat_history()
-        output_container = st.empty()
         
-        use_documents = st.checkbox("Use shared documents for context", value=False)
-
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            use_documents = st.checkbox("Use document context", value=False)
+            if use_documents:
+                self._show_document_context()
+        
+        with col2:
+            self._show_chat_controls()
+        
         user_input = st.chat_input("Type your message here...")
-
         if user_input:
-            output_container = output_container.container()
-            output_container.chat_message("user").write(user_input)
-
-            answer_container = output_container.chat_message("assistant")
-            st_callback = StreamlitCallbackHandler(answer_container)
-            cfg = RunnableConfig()
-            cfg["callbacks"] = [st_callback]
-
-            try:
-                if use_documents:
-                    response = chatbot_manager.document_retrieval(st.session_state.local_database, user_input)
-                else:
-                    response = chatbot_manager.get_response(user_input, cfg)
-                
-                answer_container.write(response["output"])
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
-                st.stop()
-
-        if st.session_state.langchain_messages:
-            col1, col2 = st.columns([3, 1])
-            with col2:
-                if st.button("Clear Chat History"):
-                    st.session_state.clear()
-                    st.rerun()
+            self._handle_user_input(user_input, chatbot_manager, use_documents)
+    
+    def _show_document_context(self):
+        if not st.session_state.local_database:
+            st.warning("📚 Please upload documents to use document context.")
+            return
             
+        with st.expander("📊 Document Statistics", expanded=False):
+            stats = st.session_state.document_stats
+            st.write(f"Total Documents: {stats.get('total_documents', 0)}")
+            st.write(f"Total Chunks: {stats.get('total_chunks', 0)}")
+            st.write(f"Last Updated: {stats.get('last_update', 'Never')}")
+            
+            if stats.get('file_details'):
+                st.divider()
+                st.subheader("📑 Processed Files")
+                for filename, details in stats['file_details'].items():
+                    with st.expander(f"📄 {filename}"):
+                        st.write(f"Chunks: {details.get('chunks', 0)}")
+                        st.write(f"Total Pages: {details.get('total_pages', 0)}")
+                        st.write(f"Average Chunk Size: {int(details.get('average_chunk_size', 0))} chars")
+                        st.write(f"Processed At: {details.get('processed_at', 'Unknown')}")
+    
+    def _process_pdf_files(self, new_files):
+        doc_processor = DocumentProcessor()
+        
+        with st.spinner("Processing documents..."):
+            progress_bar = st.progress(0)
+            for idx, file in enumerate(new_files):
+                progress = (idx + 1) / len(new_files)
+                progress_bar.progress(progress)
+                
+                chunks, vector_store = doc_processor.chunk_pdf([file])
+                if vector_store:
+                    st.session_state.local_database = vector_store
+                
+            progress_bar.empty()
+    
+    def _show_chat_controls(self):
+        if st.session_state.langchain_messages:
+            if st.button("Clear Chat History"):
+                st.session_state.clear()
+                st.rerun()
+    
+    def _handle_user_input(self, user_input, chatbot_manager, use_documents):
+        output_container = st.empty()
+        output_container.chat_message("user").write(user_input)
+
+        answer_container = output_container.chat_message("assistant")
+        st_callback = StreamlitCallbackHandler(answer_container)
+        cfg = RunnableConfig()
+        cfg["callbacks"] = [st_callback]
+
+        try:
+            if use_documents:
+                if not st.session_state.local_database:
+                    answer_container.warning("No documents are loaded for context. Proceeding with standard response.")
+                    response = chatbot_manager.get_response(user_input, cfg)
+                else:
+                    response = chatbot_manager.document_retrieval(st.session_state.local_database, user_input)
+            else:
+                response = chatbot_manager.get_response(user_input, cfg)
+            
+            answer_container.write(response["output"])
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
+            st.stop()
+
     def create_file_uploader(self, name="Upload files"):    
         uploaded_files = st.file_uploader(
             name,
@@ -86,40 +141,20 @@ class UIComponents:
         )
         
         if uploaded_files:
-            existing_files = {file['name'] for file in st.session_state.local_database}
-            new_files = [f for f in uploaded_files if f.name not in existing_files]
+            processed_files = st.session_state.document_stats["processed_files"]
+            new_files = [f for f in uploaded_files if f.name not in processed_files]
             
             if new_files:
                 self._process_pdf_files(new_files)
                 
             return new_files
         
-    def _process_pdf_files(self, new_files):
-        
-        doc_processor = DocumentProcessor()
-        chunks = doc_processor.chunk_pdf(new_files)
-        
-        for uploaded_file in new_files:
-            file_chunks = [c for c in chunks if c.metadata["file_name"] == uploaded_file.name]
-            st.session_state.local_database.append({
-                "file": uploaded_file,
-                "name": uploaded_file.name,
-                "type": uploaded_file.type,
-                "timestamp": time.time(),
-                "chunks": file_chunks
-            })
-            st.success(f"Successfully uploaded and processed {uploaded_file.name}!")
-            # st.session_state.new_files_added.append(uploaded_file.name)
-            # st.rerun()
-                    
     def create_database_connection(self):  
-        # Database type selection
         db_type = st.sidebar.selectbox(
             "Select Database Type",
             options=["MySQL", "SQLite", "PostgreSQL", "MongoDB", "Qdrant"]
         )
         
-        # Connection method
         connection_method = st.sidebar.radio(
             "Connection Method",
             options=["File", "URL", "Custom"]
@@ -160,7 +195,6 @@ class UIComponents:
                     'database': st.sidebar.text_input("Database Name")
                 })
 
-        # Connection button and handling
         col1, col2 = st.sidebar.columns(2)
         with col1:
             if st.button("Connect" if not st.session_state.external_database else "Disconnect"):
