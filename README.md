@@ -88,6 +88,10 @@ groq_api_key = "your-api-key-here"
 - 🌐 **Web Search**: DuckDuckGo integration
 - 📊 **Database**: SQLAlchemy and MongoDB support
 
+### ⚠️ Disclaimer
+
+This is a demo version with limited functionality. Not all features listed above are currently implemented.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit pull requests or open issues for bugs and feature requests.
