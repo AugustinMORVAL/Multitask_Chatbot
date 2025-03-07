@@ -185,7 +185,6 @@ class NoSQLDatabaseManager:
             raise ConnectionError("Database not connected")
             
         try:
-            # Parse the query string as JSON for NoSQL operations
             query_params = json.loads(query)
             db_type = self.database_type.lower()
             
