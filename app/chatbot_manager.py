@@ -117,7 +117,6 @@ class ChatbotManager:
         try:
             task_type = self._determine_task_type(user_input)
             
-            # Add rate limit handling for model selection
             try:
                 selection_response = self.model_selector_agent.invoke({
                     "model_specs": self.model_specs,
@@ -126,7 +125,6 @@ class ChatbotManager:
                 })
             except Exception as e:
                 if "Ratelimit" in str(e):
-                    # Use default model if rate limited
                     selection_response = AIMessage(content=f"<model>{self.model}</model><reasoning>Using default model due to rate limiting</reasoning>")
                 else:
                     raise e
