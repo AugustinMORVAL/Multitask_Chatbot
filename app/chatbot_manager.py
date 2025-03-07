@@ -60,15 +60,28 @@ class ChatbotManager:
     def _initialize_tools(self) -> List[Tool]:
         """Initialize and configure available tools."""
         search = DuckDuckGoSearchAPIWrapper(
-            max_results=10,
+            max_results=5,
             time='d',
             safesearch='moderate'
         )
         
+        def search_with_fallback(*args, **kwargs) -> str:
+            """Wrapper function to handle rate limiting."""
+            try:
+                return search.run(*args, **kwargs)
+            except Exception as e:
+                if "Ratelimit" in str(e):
+                    return (
+                        "I apologize, but I'm currently rate-limited from performing web searches. "
+                        "I'll try to answer based on my existing knowledge. If you need specific "
+                        "current information, please try again in a few minutes."
+                    )
+                raise e
+
         return [
             Tool(
                 name="Web Search",
-                func=search.run,
+                func=search_with_fallback,
                 description="Useful for finding current information from the web. Use for specific queries about current events, facts, or general knowledge.",
                 return_direct=False
             )
@@ -104,11 +117,19 @@ class ChatbotManager:
         try:
             task_type = self._determine_task_type(user_input)
             
-            selection_response = self.model_selector_agent.invoke({
-                "model_specs": self.model_specs,
-                "input": user_input,
-                "task_type": task_type
-            })
+            # Add rate limit handling for model selection
+            try:
+                selection_response = self.model_selector_agent.invoke({
+                    "model_specs": self.model_specs,
+                    "input": user_input,
+                    "task_type": task_type
+                })
+            except Exception as e:
+                if "Ratelimit" in str(e):
+                    # Use default model if rate limited
+                    selection_response = AIMessage(content=f"<model>{self.model}</model><reasoning>Using default model due to rate limiting</reasoning>")
+                else:
+                    raise e
             
             selection_text = selection_response.content if hasattr(selection_response, 'content') else str(selection_response)
             
