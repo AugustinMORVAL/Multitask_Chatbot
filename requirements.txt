@@ -19,6 +19,7 @@ numexpr
 duckduckgo-search
 # PDF Processing
 pymupdf
+faiss-cpu
 # Vector Embeddings
 sentence-transformers
 # Document Processing
